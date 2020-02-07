@@ -22,3 +22,23 @@ docker run -it --rm --cpuset-cpus="1" u-stress:latest /bin/bash
 $ docker run -it --rm --cpuset-cpus="0" --cpu-shares=512 u-stress:latest /bin/bash
 $ docker run -it --rm --cpuset-cpus="0" --cpu-shares=1024 u-stress:latest /bin/bash
 ```
+Docker: 限制容器可用的内存  
+==  
+限制内存使用上限
+--
+>在进入繁琐的设置细节之前我们先完成一个简单的用例：限制容器可以使用的最大内存为 300M。  
+>-m(--memory=) 选项可以完成这样的配置：  
+```
+docker run -it -m 300M --memory-swap -1 --name con1 u-stress /bin/bash
+```
+限制可用的 swap 大小
+--
+强调一下 --memory-swap 是必须要与 --memory 一起使用的。  
+>正常情况下， --memory-swap 的值包含容器可用内存和可用 swap。所以 --memory="300m" --memory-swap="1g" 的含义为：  
+>容器可以使用 300M 的物理内存，并且可以使用 700M(1G -300M) 的 swap。--memory-swap 居然是容器可以使用的物理内存和可以使用的 swap 之和！  
+>把 --memory-swap 设置为 0 和不设置是一样的，此时如果设置了 --memory，容器可以使用的 swap 大小为 --memory 值的两倍。  
+```
+$ docker run -it --rm -m 300M --memory-swap=300M u-stress /bin/bash
+```
+如果 --memory-swap 的值和 --memory 相同，则容器不能使用 swap。下面的 demo 演示了在没有 swap 可用的情况下向系统申请大量内存的场景： 
+
